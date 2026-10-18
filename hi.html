@@ -1,0 +1,1829 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>20/10 Handmade Project — By Nam</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Courier+Prime:ital,wght@0,400;0,700;1,400&family=Mali:ital,wght@0,400;0,600;0,700;1,400&family=Patrick+Hand&family=Playfair+Display:ital,wght@0,600;0,800;1,400&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --desk-bg: #e6dfd3;
+            --desk-grid: #d5ccb9;
+            --kraft-bg: #f3e9d2;
+            --kraft-border: #c8b696;
+            --ink-sepia: #3b281e;
+            --stamp-red: #b8292f;
+            --brutal-yellow: #ffe600;
+            --brutal-pink: #ff6b9d;
+            --brutal-cyan: #00e5ff;
+            --pen-blue: #1b369c;
+            --oly-line: #b8e2f2;
+            --oly-margin: #f28b82;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            /* Đã bỏ user-select: none để không bị vướng bôi đen chữ */
+        }
+
+        body {
+            background-color: var(--desk-bg);
+            background-image: 
+                radial-gradient(var(--desk-grid) 1.5px, transparent 1.5px),
+                radial-gradient(var(--desk-grid) 1.5px, var(--desk-bg) 1.5px);
+            background-size: 28px 28px;
+            background-position: 0 0, 14px 14px;
+            color: #1f1f1f;
+            font-family: 'Space Grotesk', sans-serif;
+            min-height: 100vh;
+            width: 100%;
+            overflow-x: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        body::before {
+            content: "";
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 999;
+            opacity: 0.22;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+        }
+
+        .topbar {
+            width: 100%;
+            max-width: 1100px;
+            margin: 14px auto 0;
+            padding: 0 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+            z-index: 20;
+        }
+
+        .author-tag {
+            background: #1f1f1f;
+            color: #fff;
+            padding: 8px 16px;
+            font-family: 'Courier Prime', monospace;
+            font-weight: 700;
+            font-size: 13.5px;
+            border: 2px solid #1f1f1f;
+            box-shadow: 4px 4px 0px #9e9382;
+            transform: rotate(-1deg);
+        }
+
+        .toolbar-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .tool-btn {
+            background: #fffdf9;
+            color: #1f1f1f;
+            border: 2px solid #1f1f1f;
+            padding: 8px 14px;
+            font-family: 'Space Grotesk', sans-serif;
+            font-weight: 700;
+            font-size: 13px;
+            cursor: pointer;
+            box-shadow: 3px 3px 0px #1f1f1f;
+            transition: transform 0.1s, box-shadow 0.1s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .tool-btn:hover {
+            transform: translate(-1px, -1px);
+            box-shadow: 4px 4px 0px #1f1f1f;
+        }
+
+        .tool-btn:active {
+            transform: translate(2px, 2px);
+            box-shadow: 1px 1px 0px #1f1f1f;
+        }
+
+        .tool-btn.active-mode {
+            background: var(--brutal-yellow);
+        }
+
+        .workspace {
+            width: 100%;
+            max-width: 1100px;
+            margin: 12px auto;
+            padding: 8px 16px 24px;
+            flex-grow: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .view-section {
+            width: 100%;
+            display: none;
+            animation: popIn 0.35s cubic-bezier(0.18, 0.89, 0.32, 1.28);
+        }
+
+        .view-section.active {
+            display: block;
+        }
+
+        @keyframes popIn {
+            0% { opacity: 0; transform: translateY(12px) scale(0.98); }
+            100% { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        .washi-tape {
+            position: absolute;
+            width: 90px;
+            height: 24px;
+            background: rgba(229, 115, 115, 0.55);
+            border-left: 2px dotted rgba(255,255,255,0.6);
+            border-right: 2px dotted rgba(255,255,255,0.6);
+            top: -11px;
+            left: 50%;
+            transform: translateX(-50%) rotate(-2.5deg);
+            z-index: 5;
+            pointer-events: none;
+        }
+
+        .washi-tape.blue {
+            background: rgba(100, 181, 246, 0.55);
+            transform: translateX(-50%) rotate(2deg);
+        }
+
+        .washi-tape.yellow {
+            background: rgba(255, 213, 79, 0.7);
+            transform: translateX(-50%) rotate(-1.5deg);
+        }
+
+        .desk-header {
+            background: #fffdf7;
+            border: 3px solid #1f1f1f;
+            box-shadow: 5px 5px 0px #1f1f1f;
+            padding: 18px 14px;
+            text-align: center;
+            position: relative;
+            margin-bottom: 22px;
+            width: 100%;
+            transform: rotate(-0.2deg);
+        }
+
+        .desk-title {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(22px, 3.2vw, 32px);
+            font-weight: 800;
+            color: #1f1f1f;
+            line-height: 1.2;
+            margin-bottom: 6px;
+        }
+
+        .desk-subtitle {
+            font-family: 'Courier Prime', monospace;
+            font-size: clamp(12.5px, 1.6vw, 14.5px);
+            color: #4a4a4a;
+        }
+
+        .objects-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 22px;
+            width: 100%;
+        }
+
+        @media (max-width: 768px) {
+            .objects-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .obj-card-mom {
+            background: var(--kraft-bg);
+            border: 2px solid #7c6246;
+            padding: 20px 18px;
+            position: relative;
+            cursor: pointer;
+            box-shadow: 4px 5px 12px rgba(60, 40, 20, 0.16);
+            transform: rotate(-1deg);
+            transition: all 0.22s ease;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .obj-card-mom:hover {
+            transform: rotate(0deg) translateY(-4px);
+            box-shadow: 7px 10px 18px rgba(60, 40, 20, 0.22);
+        }
+
+        .postage-stamp {
+            width: 48px;
+            height: 58px;
+            background: #fdfaf2;
+            border: 2px dashed #8c6d46;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Courier Prime', monospace;
+            font-size: 9px;
+            color: #7c2d12;
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            padding: 4px;
+            text-align: center;
+        }
+
+        .obj-card-sister {
+            background: #ffffff;
+            border: 3px solid #111;
+            padding: 20px 18px;
+            position: relative;
+            cursor: pointer;
+            box-shadow: 6px 6px 0px #111;
+            transform: rotate(0.6deg);
+            transition: all 0.2s ease;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .obj-card-sister:hover {
+            transform: rotate(0deg) translate(-2px, -2px);
+            box-shadow: 9px 9px 0px #111;
+            background: #fffef5;
+        }
+
+        .barcode-strip {
+            font-family: 'Courier Prime', monospace;
+            font-size: 10px;
+            letter-spacing: 2.5px;
+            border-top: 2px dashed #111;
+            padding-top: 8px;
+            margin-top: 12px;
+            text-align: center;
+            font-weight: 700;
+        }
+
+        .obj-card-class {
+            background-color: #ffffff;
+            background-image: 
+                linear-gradient(90deg, transparent 34px, var(--oly-margin) 34px, var(--oly-margin) 36px, transparent 36px),
+                linear-gradient(var(--oly-line) 1px, transparent 1px),
+                linear-gradient(90deg, var(--oly-line) 1px, transparent 1px);
+            background-size: 100% 100%, 24px 24px, 24px 24px;
+            border: 2px solid #2b4c7e;
+            padding: 20px 16px 20px 38px;
+            position: relative;
+            cursor: pointer;
+            box-shadow: 5px 5px 0px #2b4c7e;
+            transform: rotate(-0.6deg);
+            transition: all 0.2s ease;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .obj-card-class:hover {
+            transform: rotate(0deg) translateY(-4px);
+            box-shadow: 7px 7px 0px #2b4c7e;
+        }
+
+        .obj-card-teacher {
+            background-color: #1e4631;
+            background-image: radial-gradient(rgba(255, 255, 255, 0.08) 1px, transparent 0);
+            background-size: 18px 18px;
+            border: 4px solid #8b5a2b;
+            outline: 2px solid #3b2313;
+            padding: 20px 18px;
+            position: relative;
+            cursor: pointer;
+            box-shadow: 5px 5px 0px #3b2313;
+            transform: rotate(0.8deg);
+            transition: all 0.22s ease;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            color: #f4f1ea;
+        }
+
+        .obj-card-teacher:hover {
+            transform: rotate(0deg) translateY(-4px);
+            box-shadow: 8px 8px 0px #3b2313;
+        }
+
+        .flower-10-badge {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: #ffeb3b;
+            color: #b71c1c;
+            border: 2px dashed #b71c1c;
+            border-radius: 50%;
+            width: 46px;
+            height: 46px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Patrick Hand', cursive;
+            font-weight: 700;
+            font-size: 10.5px;
+            line-height: 1.1;
+            transform: rotate(10deg);
+            box-shadow: 2px 2px 0px rgba(0,0,0,0.35);
+        }
+
+        .action-pill {
+            margin-top: 14px;
+            padding: 8px 12px;
+            font-weight: 700;
+            font-size: 13px;
+            text-align: center;
+            border: 2px solid #111;
+            display: inline-block;
+            width: 100%;
+        }
+
+        .kraft-container {
+            width: 100%;
+            max-width: 850px;
+            margin: 0 auto;
+            background: var(--kraft-bg);
+            border: 2px solid #8c6d46;
+            box-shadow: 0 14px 30px rgba(59, 40, 30, 0.2), inset 0 0 40px rgba(166, 130, 90, 0.2);
+            padding: clamp(14px, 3.5vw, 32px);
+            position: relative;
+            color: var(--ink-sepia);
+        }
+
+        .kraft-inner-border {
+            border: 2px double #9e7b56;
+            padding: clamp(12px, 3vw, 26px);
+            position: relative;
+        }
+
+        .vintage-heading {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(20px, 3.2vw, 30px);
+            color: #6b2418;
+            margin-bottom: 12px;
+            border-bottom: 1px solid #bda07e;
+            padding-bottom: 6px;
+        }
+
+        .vintage-body {
+            font-family: 'Mali', cursive;
+            font-size: clamp(13.5px, 1.8vw, 16px);
+            line-height: 1.75;
+            color: #382417;
+        }
+
+        .vintage-body p {
+            margin-bottom: 10px;
+            text-indent: 18px;
+        }
+
+        .svg-draw-box {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 14px 0;
+            padding: 12px;
+            background: rgba(255, 252, 242, 0.65);
+            border: 1px dashed #9e7b56;
+        }
+
+        .ink-path {
+            stroke-dasharray: 600;
+            stroke-dashoffset: 600;
+            animation: drawInk 3s ease forwards;
+        }
+
+        @keyframes drawInk {
+            to { stroke-dashoffset: 0; }
+        }
+
+        .vase-garden {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            justify-content: center;
+            min-height: 36px;
+            margin-top: 6px;
+            padding: 4px;
+        }
+
+        .planted-flower {
+            font-size: 22px;
+            animation: popIn 0.3s ease;
+        }
+
+        .brutal-container {
+            width: 100%;
+            max-width: 900px;
+            margin: 0 auto;
+            background: #ffffff;
+            border: 4px solid #111;
+            box-shadow: 7px 7px 0px #111;
+            padding: clamp(14px, 3.5vw, 28px);
+            position: relative;
+        }
+
+        .sister-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 18px;
+            margin-top: 14px;
+        }
+
+        .receipt-paper {
+            background: #fcfcfa;
+            border-left: 2px solid #222;
+            border-right: 2px solid #222;
+            padding: 16px 14px;
+            font-family: 'Courier Prime', monospace;
+            font-size: 12.5px;
+            color: #111;
+            box-shadow: 4px 4px 0px #111;
+            position: relative;
+        }
+
+        .receipt-line {
+            display: flex;
+            justify-content: space-between;
+            border-bottom: 1px dashed #aaa;
+            padding: 5px 0;
+            gap: 8px;
+        }
+
+        .scratch-box {
+            background: #fff9db;
+            border: 3px solid #111;
+            padding: 14px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 4px 4px 0px #111;
+        }
+
+        .scratch-stage {
+            position: relative;
+            width: 100%;
+            max-width: 260px;
+            height: 110px;
+            border: 3px solid #111;
+            background: #ffffff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 10px;
+            text-align: center;
+            overflow: hidden;
+        }
+
+        .scratch-prize-text {
+            font-family: 'Space Grotesk', sans-serif;
+            font-weight: 700;
+            font-size: 13.5px;
+            color: #d90429;
+            z-index: 1;
+        }
+
+        #scratchCanvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 2;
+            cursor: crosshair;
+            touch-action: none;
+        }
+
+        .notebook-container {
+            width: 100%;
+            max-width: 850px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            background-image: 
+                linear-gradient(90deg, transparent 44px, var(--oly-margin) 44px, var(--oly-margin) 46px, transparent 46px),
+                linear-gradient(var(--oly-line) 1px, transparent 1px),
+                linear-gradient(90deg, var(--oly-line) 1px, transparent 1px);
+            background-size: 100% 100%, 24px 24px, 24px 24px;
+            border: 3px solid #1b369c;
+            box-shadow: 6px 6px 0px #1b369c;
+            padding: 22px 18px 24px 52px;
+            position: relative;
+            font-family: 'Patrick Hand', cursive;
+            color: var(--pen-blue);
+        }
+
+        @media (max-width: 640px) {
+            .notebook-container {
+                background-image: 
+                    linear-gradient(90deg, transparent 22px, var(--oly-margin) 22px, var(--oly-margin) 24px, transparent 24px),
+                    linear-gradient(var(--oly-line) 1px, transparent 1px),
+                    linear-gradient(90deg, var(--oly-line) 1px, transparent 1px);
+                padding: 16px 12px 18px 32px;
+            }
+        }
+
+        .notebook-header-meta {
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            border-bottom: 2px solid var(--pen-blue);
+            padding-bottom: 5px;
+            margin-bottom: 12px;
+            font-size: 16px;
+        }
+
+        .pen-writing {
+            font-size: clamp(16px, 2vw, 19.5px);
+            line-height: 1.6;
+            color: var(--pen-blue);
+        }
+
+        .red-teacher-comment {
+            color: #d62828;
+            font-family: 'Mali', cursive;
+            font-weight: 700;
+            border: 2px solid #d62828;
+            display: inline-block;
+            padding: 4px 10px;
+            transform: rotate(-1.5deg);
+            margin: 8px 0;
+            background: rgba(255, 255, 255, 0.85);
+            font-size: clamp(13.5px, 1.8vw, 16px);
+        }
+
+        .stamp-seal {
+            width: 110px;
+            height: 110px;
+            border: 4px double #d62828;
+            border-radius: 50%;
+            color: #d62828;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            font-family: 'Courier Prime', monospace;
+            font-weight: 700;
+            font-size: 11px;
+            text-transform: uppercase;
+            transform: rotate(-12deg) scale(1);
+            background: rgba(214, 40, 40, 0.06);
+            padding: 6px;
+            box-shadow: inset 0 0 0 2px #d62828;
+            animation: slamStamp 0.25s cubic-bezier(0.17, 0.89, 0.32, 1.49);
+        }
+
+        @keyframes slamStamp {
+            0% { transform: rotate(-12deg) scale(2.2); opacity: 0; }
+            100% { transform: rotate(-12deg) scale(1); opacity: 1; }
+        }
+
+        .notebook-input {
+            border: none;
+            border-bottom: 2px dotted var(--pen-blue);
+            background: rgba(255, 255, 255, 0.8);
+            font-family: 'Patrick Hand', cursive;
+            font-size: 17px;
+            color: #d62828;
+            padding: 2px 6px;
+            width: 160px;
+            outline: none;
+        }
+
+        .prank-zone {
+            margin-top: 16px;
+            border: 2px dashed var(--pen-blue);
+            background: rgba(255, 255, 255, 0.88);
+            padding: 14px;
+            position: relative;
+            min-height: 150px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            overflow: hidden;
+        }
+
+        #dodgeBtn {
+            transition: transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1);
+            position: relative;
+            z-index: 10;
+        }
+
+        .back-nav-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: #1f1f1f;
+            color: #fff;
+            border: none;
+            padding: 6px 12px;
+            font-family: 'Courier Prime', monospace;
+            font-weight: 700;
+            font-size: 12px;
+            cursor: pointer;
+            margin-bottom: 12px;
+        }
+
+        .back-nav-btn:hover {
+            background: #3a3a3a;
+        }
+
+        .ai-handmade-box {
+            margin-top: 14px;
+            padding: 10px 12px;
+            position: relative;
+        }
+
+        .ai-kraft-box {
+            background: rgba(255, 250, 240, 0.75);
+            border: 2px dashed #8c2d19;
+            font-family: 'Courier Prime', monospace;
+        }
+
+        .ai-brutal-box {
+            background: #f0f4ff;
+            border: 2px solid #111;
+            box-shadow: 3px 3px 0px #111;
+            margin-top: 10px;
+            padding: 8px;
+        }
+
+        .ai-input-brutal {
+            width: 100%;
+            border: 2px solid #111;
+            padding: 6px 8px;
+            font-family: 'Courier Prime', monospace;
+            font-size: 12px;
+            background: #fff;
+            margin-bottom: 6px;
+            outline: none;
+        }
+
+        .mom-ps-note {
+            margin-top: 12px;
+            padding: 8px 12px;
+            background: #fff8e7;
+            border-left: 4px solid #8c2d19;
+            font-family: 'Mali', cursive;
+            font-size: 14.5px;
+            color: #4a2511;
+            display: none;
+        }
+
+        .chalkboard-container {
+            width: 100%;
+            max-width: 900px;
+            margin: 0 auto;
+            background-color: #193c28;
+            background-image: 
+                radial-gradient(circle at 30% 40%, rgba(255, 255, 255, 0.07), transparent 55%),
+                radial-gradient(circle at 75% 70%, rgba(255, 255, 255, 0.05), transparent 45%);
+            border: 8px solid #8b5a2b;
+            border-bottom: 14px solid #6e441f;
+            box-shadow: 0 12px 28px rgba(0, 0, 0, 0.26), inset 0 0 22px rgba(0, 0, 0, 0.4);
+            padding: clamp(14px, 3.5vmax, 26px);
+            position: relative;
+            color: #f8f6f0;
+            font-family: 'Patrick Hand', cursive;
+        }
+
+        .chalk-header {
+            text-align: center;
+            border-bottom: 2px dashed rgba(255, 255, 255, 0.45);
+            padding-bottom: 10px;
+            margin-bottom: 16px;
+        }
+
+        .chalk-title {
+            font-family: 'Mali', cursive;
+            font-size: clamp(20px, 3.2vw, 32px);
+            color: #fff9db;
+            text-shadow: 1px 1px 0px rgba(255, 255, 255, 0.3);
+            letter-spacing: 0.5px;
+        }
+
+        .teacher-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 18px;
+            align-items: start;
+        }
+
+        .pinned-lesson-note {
+            background: #fffdf5;
+            color: #2b2b2b;
+            border: 2px solid #d4c5a9;
+            padding: 16px 14px;
+            position: relative;
+            box-shadow: 4px 5px 12px rgba(0, 0, 0, 0.32);
+            transform: rotate(-0.6deg);
+            font-family: 'Mali', cursive;
+        }
+
+        .magnet-pin {
+            width: 18px;
+            height: 18px;
+            background: #e53935;
+            border: 2px solid #fff;
+            border-radius: 50%;
+            position: absolute;
+            top: -8px;
+            left: 50%;
+            transform: translateX(-50%);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.4);
+        }
+
+        .chalk-draw-panel {
+            background: rgba(15, 38, 25, 0.65);
+            border: 2px dashed rgba(255, 255, 255, 0.4);
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        #chalkCanvas {
+            width: 100%;
+            height: 175px;
+            background: #143321;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            cursor: crosshair;
+            touch-action: none;
+        }
+
+        .chalk-color-btn {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            border: 2px solid #fff;
+            cursor: pointer;
+            transition: transform 0.15s;
+        }
+
+        .chalk-color-btn.active {
+            transform: scale(1.2);
+            box-shadow: 0 0 6px rgba(255,255,255,0.9);
+        }
+
+        .pledge-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 5px;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        .pledge-item input {
+            width: 16px;
+            height: 16px;
+            accent-color: #2e7d32;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+    <header class="topbar">
+        <div class="author-tag">
+            📌 PROJECT: 20/10 • CODE BY NAM
+        </div>
+
+        <div class="toolbar-actions">
+            <button id="soundBtn" class="tool-btn active-mode" onclick="toggleRetroMusic()">
+                <span id="soundIcon">🎵</span>
+                <span id="soundLabel">Đang phát Nhạc 20/10</span>
+            </button>
+        </div>
+    </header>
+
+    <main class="workspace">
+
+        <section id="view-home" class="view-section active">
+            <div class="desk-header">
+                <div class="washi-tape"></div>
+                <p style="font-family: 'Courier Prime', monospace; font-weight: 700; font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: #b8292f; margin-bottom: 4px;">
+                    ★ BÀN LÀM VIỆC CỦA NAM — NGÀY 20 THÁNG 10 ★
+                </p>
+                <h1 class="desk-title">
+                    Hộp Thư & Quà 20/10 Tự Làm
+                </h1>
+                <p class="desk-subtitle">
+                    Trên bàn có 4 món đồ dành cho 4 đối tượng. Ai thuộc biên chế nào thì bấm đúng món đó nhé =)))
+                </p>
+            </div>
+
+            <div class="objects-grid">
+                
+                <!-- BUTTON 1: MOM'S KRAFT ENVELOPE -->
+                <div class="obj-card-mom" onclick="switchView('mom')">
+                    <div class="washi-tape yellow"></div>
+                    <div class="postage-stamp">
+                        <span style="font-size: 15px;">🌷</span>
+                        <span>20-10</span>
+                        <span>VIỆT NAM</span>
+                    </div>
+
+                    <div>
+                        <span style="font-family: 'Courier Prime', monospace; font-size: 11px; color: #7c2d12; font-weight: 700;">
+                            [BƯU PHẨM SỐ 01 - ƯU TIÊN]
+                        </span>
+                        <h2 style="font-family: 'Playfair Display', serif; font-size: 22px; color: #3b281e; margin: 6px 0;">
+                            Thư Tay Gửi Mẹ
+                        </h2>
+                        <p style="font-family: 'Mali', cursive; font-size: 13.5px; color: #5c4028; line-height: 1.5;">
+                            Giấy viết thư cổ điển kèm tranh vẽ hoa bằng mực cho người phụ nữ quyền lực nhất nhà (kiêm người nắm giữ công tắc cục Wi-Fi =))) ).
+                        </p>
+                    </div>
+
+                    <div class="action-pill" style="background: #8c2d19; color: #fdfaf2; border-color: #3b281e; font-family: 'Playfair Display', serif;">
+                        Mở Phong Bì Của Mẹ ✉
+                    </div>
+                </div>
+
+                <!-- BUTTON 2: SISTER'S BRUTALIST VIP TICKET -->
+                <div class="obj-card-sister" onclick="switchView('sister')">
+                    <div class="washi-tape"></div>
+                    <div>
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <span style="background: var(--brutal-yellow); border: 2px solid #111; padding: 2px 6px; font-size: 11px; font-weight: 700;">
+                                VÉ VIP #02
+                            </span>
+                            <span style="font-family: 'Courier Prime', monospace; font-size: 11px; font-weight: 700;">
+                                20/10 EDITION
+                            </span>
+                        </div>
+
+                        <h2 style="font-size: 22px; font-weight: 700; margin: 8px 0 6px; color: #111;">
+                            Gửi Chị Gái Tối Cao
+                        </h2>
+                        <p style="font-size: 13px; color: #333; line-height: 1.5;">
+                            Bao gồm: Máy in hóa đơn tổng kết công trạng + <strong>Thẻ cào tráng bạc thật 100%</strong> (dùng ngón tay/chuột cào trực tiếp để lấy quà).
+                        </p>
+                    </div>
+
+                    <div>
+                        <div class="barcode-strip">||| |||| || ||||| ||| ||||</div>
+                        <div class="action-pill" style="background: var(--brutal-yellow); color: #111;">
+                            Vào Quầy Cào Thẻ & In Bill 🧾
+                        </div>
+                    </div>
+                </div>
+
+                <!-- BUTTON 3: CLASSMATES' NOTEBOOK PAGE -->
+                <div class="obj-card-class" onclick="switchView('classmates')">
+                    <div class="washi-tape blue"></div>
+                    <div>
+                        <span style="font-family: 'Patrick Hand', cursive; font-size: 14.5px; color: #1b369c; font-weight: 700;">
+                            ★ Trang Sổ Ghi Chép 20/10
+                        </span>
+                        <h2 style="font-family: 'Patrick Hand', cursive; font-size: 26px; color: var(--pen-blue); margin: 6px 0;">
+                            Hội Con Gái Lớp Tôi
+                        </h2>
+                        <p style="font-family: 'Patrick Hand', cursive; font-size: 16px; color: var(--pen-blue); line-height: 1.4;">
+                            Trang vở ô ly viết bút bi xanh: Lời chúc mừng độc quyền và góc đòi trà sữa siêu lầy.
+                        </p>
+                    </div>
+
+                    <div class="action-pill" style="background: #1b369c; color: #fff; font-family: 'Patrick Hand', cursive; font-size: 16px;">
+                        Mở Trang Vở Ô Ly Lớp Mình 🖋️
+                    </div>
+                </div>
+
+                <!-- BUTTON 4: TEACHER'S CHALKBOARD -->
+                <div class="obj-card-teacher" onclick="switchView('teacher')">
+                    <div class="washi-tape yellow"></div>
+                    <div class="flower-10-badge">
+                        <span>🌸 10</span>
+                        <span>ĐIỂM</span>
+                    </div>
+
+                    <div>
+                        <span style="font-family: 'Courier Prime', monospace; font-size: 11px; color: #ffeb3b; font-weight: 700;">
+                            [BẢNG VÀNG TRI ÂN #04]
+                        </span>
+                        <h2 style="font-family: 'Mali', cursive; font-size: 22px; color: #ffffff; margin: 6px 0 6px;">
+                            Kính Gửi Cô Giáo
+                        </h2>
+                        <p style="font-family: 'Patrick Hand', cursive; font-size: 16px; color: #e2ece9; line-height: 1.4;">
+                            Bảng phấn xanh lớp học: Có bảng vẽ phấn màu trực tiếp, phiếu cam kết học trò và AI viết lời chúc theo môn dạy!
+                        </p>
+                    </div>
+
+                    <div class="action-pill" style="background: #ffeb3b; color: #1b3b2b; border-color: #111; font-family: 'Mali', cursive; font-size: 14px;">
+                        Mở Bảng Phấn Tri Ân Cô Giáo 👩‍🏫
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <section id="view-mom" class="view-section">
+            <div class="kraft-container">
+                <button class="back-nav-btn" style="background: #6b2418;" onclick="switchView('home')">
+                    ← Quay lại mặt bàn chính
+                </button>
+
+                <div class="kraft-inner-border">
+                    <div class="postage-stamp" style="top: 10px; right: 10px;">
+                        <span style="font-size: 15px;">🌺</span>
+                        <span>20-10</span>
+                        <span>MẸ YÊU</span>
+                    </div>
+
+                    <h2 class="vintage-heading">
+                        Gửi Mẹ Yêu Của Con!
+                    </h2>
+
+                    <div class="vintage-body">
+                        <p>
+                            Nhân ngày Phụ nữ Việt Nam 20/10, con chúc Mẹ luôn dồi dào sức khỏe, lúc nào cũng tươi trẻ, vui vẻ và bớt đau lưng mỏi gối. Cảm ơn Mẹ vì lúc nào cũng nấu đồ ăn ngon và lo lắng cho cả nhà từng chút một.
+                        </p>
+                        <p>
+                            Dù thỉnh thoảng con hơi mải ngồi máy tính vọc code hay trời mưa sấm chớp bị Mẹ rút phích cắm cục Wi-Fi làm con rớt mạng một tí =))), nhưng Mẹ vẫn luôn là người phụ nữ tuyệt vời và quyền lực số 1 trong lòng con!
+                        </p>
+                    </div>
+
+                    <div id="momAiOutput" class="mom-ps-note"></div>
+
+                    <!-- SVG Rose Animation & Garden -->
+                    <div class="svg-draw-box">
+                        <svg width="75" height="75" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path class="ink-path" d="M50 88 C50 65, 50 45, 50 35" stroke="#2d5a27" stroke-width="3" stroke-linecap="round"/>
+                            <path class="ink-path" d="M50 65 C35 60, 30 50, 45 52" stroke="#2d5a27" stroke-width="2.5" stroke-linecap="round"/>
+                            <path class="ink-path" d="M50 55 C65 50, 70 40, 55 42" stroke="#2d5a27" stroke-width="2.5" stroke-linecap="round"/>
+                            <path class="ink-path" d="M50 35 C35 35, 30 20, 50 15 C70 20, 65 35, 50 35 Z" stroke="#b8292f" stroke-width="3" fill="rgba(184, 41, 47, 0.12)"/>
+                        </svg>
+                        <p style="font-family: 'Courier Prime', monospace; font-size: 12px; color: #5c4028; margin-top: 4px;">
+                            Số hoa con cắm tặng Mẹ: <strong id="flowerCount">1</strong> bông
+                        </p>
+                        <div id="momGarden" class="vase-garden">
+                            <span class="planted-flower">🌷</span>
+                        </div>
+                        <button class="tool-btn" style="background: #8c2d19; color: #fff; margin-top: 6px; font-size: 12px;" onclick="plantFlowerForMom()">
+                            🌷 Cắm Thêm Hoa Tặng Mẹ
+                        </button>
+                    </div>
+
+                    <!-- AI Post Office -->
+                    <div class="ai-handmade-box ai-kraft-box">
+                        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 6px; margin-bottom: 6px;">
+                            <strong style="font-size: 12px; color: #6b2418;">📠 MÁY ĐÁNH CHỮ BƯU ĐIỆN AI:</strong>
+                            <span id="momAiStatus" style="font-size: 11px; color: #6b2418;"></span>
+                        </div>
+                        <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+                            <button class="tool-btn" style="background: #fffdf7; font-size: 11.5px;" onclick="generateMomAIContent('poem')">
+                                ✨ Thơ Lục Bát Tặng Mẹ
+                            </button>
+                            <button class="tool-btn" style="background: #fffdf7; font-size: 11.5px;" onclick="generateMomAIContent('ps')">
+                                ✨ Viết Thêm Tái Bút (P/S)
+                            </button>
+                        </div>
+                    </div>
+
+                    <div style="text-align: right; margin-top: 12px; font-family: 'Mali', cursive; font-weight: 700; color: #6b2418;">
+                        Con trai của Mẹ — Nam 💻
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="view-sister" class="view-section">
+            <div class="brutal-container">
+                <button class="back-nav-btn" onclick="switchView('home')">
+                    ← Quay lại mặt bàn chính
+                </button>
+
+                <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; border-bottom: 4px solid #111; padding-bottom: 10px;">
+                    <div>
+                        <span style="background: var(--brutal-pink); color: #fff; border: 2px solid #111; padding: 2px 6px; font-size: 11px; font-weight: 700;">
+                            CHUYÊN MỤC CHỊ EM TƯƠNG TÀN
+                        </span>
+                        <h2 style="font-size: clamp(20px, 3.2vw, 28px); font-weight: 700; margin-top: 4px;">
+                            Trạm Giao Dịch 20/10 Của Chị Gái
+                        </h2>
+                    </div>
+                    <div style="font-family: 'Courier Prime', monospace; font-size: 11.5px; background: #eee; padding: 4px 8px; border: 2px solid #111;">
+                        THU NGÂN: EM TRAI NAM
+                    </div>
+                </div>
+
+                <div class="sister-grid">
+                    <!-- Thermal Receipt -->
+                    <div class="receipt-paper">
+                        <div style="text-align: center; border-bottom: 2px dashed #111; padding-bottom: 6px; margin-bottom: 8px;">
+                            <strong style="font-size: 14px;">HÓA ĐƠN TỔNG KẾT 20/10</strong><br>
+                            <span>Cửa hàng: Tình Chị Em Bất Diệt</span><br>
+                            <span>Ngày: 20/10 • Máy: Arch-POS</span>
+                        </div>
+
+                        <div id="receiptItems">
+                            <div class="receipt-line">
+                                <span>01x Chúc chị xinh đẹp tuyệt trần</span>
+                                <strong>0 VNĐ</strong>
+                            </div>
+                            <div class="receipt-line">
+                                <span>01x Bớt cọc tính với em trai</span>
+                                <strong>CẦN GẤP</strong>
+                            </div>
+                            <div class="receipt-line">
+                                <span>99x Sửa máy tính / Cài Win hộ</span>
+                                <strong>FREE</strong>
+                            </div>
+                        </div>
+
+                        <div style="border-top: 2px solid #111; margin-top: 8px; padding-top: 6px; display: flex; justify-content: space-between; font-size: 13.5px;">
+                            <strong>TỔNG NHÂN PHẨM:</strong>
+                            <strong style="background: var(--brutal-yellow); padding: 0 4px;">10 / 10 ĐIỂM</strong>
+                        </div>
+
+                        <button class="tool-btn" style="width: 100%; justify-content: center; margin-top: 10px; background: var(--brutal-cyan); font-size: 12px;" onclick="addFunnyReceiptLine()">
+                            🖨️ In Thêm Dòng Kể Công Mới
+                        </button>
+
+                        <div class="ai-brutal-box">
+                            <div style="font-weight: 700; font-size: 11px; margin-bottom: 4px; display: flex; justify-content: space-between;">
+                                <span>🤖 AI TÍNH SỔ & TẠO QUÀ CÀO:</span>
+                                <span id="sisterAiStatus" style="color: #d90429;"></span>
+                            </div>
+                            <input type="text" id="sisterTraitInput" class="ai-input-brutal" placeholder="Nhập đặc điểm chị (vd: nghiện trà sữa...)">
+                            <button class="tool-btn" style="width: 100%; justify-content: center; background: var(--brutal-pink); color: #fff; font-size: 12px;" onclick="generateSisterAIReceiptAndPrize()">
+                                ✨ AI In Bill & Đổi Quà Cào
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Scratch Card -->
+                    <div class="scratch-box">
+                        <div style="text-align: center;">
+                            <span style="background: #111; color: var(--brutal-yellow); padding: 2px 6px; font-size: 11px; font-weight: 700;">
+                                CÀO THẬT TAY TRÊN MÀN HÌNH
+                            </span>
+                            <h3 style="font-size: 17.5px; margin-top: 5px;">Thẻ Cào Nhân Phẩm 20/10</h3>
+                            <p style="font-size: 12px; color: #444; margin-top: 2px;">
+                                Dùng chuột/ngón tay chà lên lớp nhũ bạc để lộ phần thưởng!
+                            </p>
+                        </div>
+
+                        <div class="scratch-stage">
+                            <div id="scratchPrizeText" class="scratch-prize-text">
+                                🧋 Voucher: 1 ly trà sữa full topping (Em trai đi mua giúp, chị trả tiền =))) )
+                            </div>
+                            <canvas id="scratchCanvas"></canvas>
+                        </div>
+
+                        <div style="width: 100%; display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-top: 6px;">
+                            <span id="scratchStatus" style="font-family: 'Courier Prime', monospace; font-size: 11px; font-weight: 700;">
+                                Trạng thái: Chưa cào
+                            </span>
+                            <button class="tool-btn" style="background: var(--brutal-yellow); font-size: 11.5px;" onclick="resetScratchCard(true)">
+                                🔄 Đổi Thẻ Khác
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="view-classmates" class="view-section">
+            <div class="notebook-container">
+                <button class="back-nav-btn" style="background: #1b369c;" onclick="switchView('home')">
+                    ← Quay lại mặt bàn chính
+                </button>
+
+                <div class="notebook-header-meta">
+                    <span>Thứ ... ngày 20 tháng 10 năm 2026</span>
+                    <span>Sổ Tay Nhóm Bạn Gái Lớp Tôi</span>
+                </div>
+
+                <div style="text-align: center; margin-bottom: 12px;">
+                    <h2 style="font-size: clamp(22px, 3.2vw, 30px); text-transform: uppercase; letter-spacing: 1px;">
+                        Lời Chúc Mừng 20/10 Gửi Hội Con Gái
+                    </h2>
+                    <div class="red-teacher-comment">
+                        Ghi chú: Chúc hội con gái lớp mình lúc nào cũng xinh tươi, điểm cao ngất ngưởng!
+                    </div>
+                </div>
+
+                <div class="pen-writing">
+                    <p>
+                        1. Nhân dịp 20/10, chúc toàn thể các bạn nữ lớp mình lúc nào cũng rạng rỡ, kiểm tra bài nào cũng trúng tủ 9 - 10 điểm, và đặc biệt là ngồi bàn học lúc nào cũng vui vẻ!
+                    </p>
+                    <p style="margin-top: 5px;">
+                        2. <strong>Bật mí nhỏ:</strong> Hôm nay ông Nam tự nguyện chúc mừng bằng cái web tự code này, mong các bà xem xong đừng chê gà mờ nhé =)))
+                    </p>
+                </div>
+
+                <!-- Certificate Generator -->
+                <div style="margin-top: 14px; padding: 12px; border: 2px solid var(--pen-blue); background: rgba(255,255,255,0.92); display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px;">
+                    <div style="flex: 1; min-width: 220px;">
+                        <div style="font-size: 16.5px; font-weight: 700; margin-bottom: 5px;">
+                            📝 Tạo Thẻ Chúc Mừng Riêng Cho Từng Bạn Nữ:
+                        </div>
+                        <div style="display: flex; flex-wrap: wrap; gap: 6px; align-items: center;">
+                            <span>Tên bạn nữ:</span>
+                            <input type="text" id="girlNameInput" class="notebook-input" placeholder="Gõ tên..." maxlength="25">
+                            <span>Đặc điểm:</span>
+                            <input type="text" id="girlTraitInput" class="notebook-input" style="width: 150px;" placeholder="Vd: hay ăn vặt..." maxlength="30">
+                        </div>
+                        <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px;">
+                            <button class="tool-btn" style="background: #d62828; color: #fff; font-family: 'Patrick Hand', cursive; font-size: 15px;" onclick="stampCertificate()">
+                                💮 Đóng Dấu Chúc Mừng
+                            </button>
+                            <button class="tool-btn" style="background: #1b369c; color: #fff; font-family: 'Patrick Hand', cursive; font-size: 15px;" onclick="generateClassmateAICertificate()">
+                                ✨ Xin Lời Chúc AI Độc Quyền
+                            </button>
+                        </div>
+                        <p id="certResultText" style="margin-top: 6px; font-size: 15px; color: #d62828; font-weight: 700;">
+                            Nhập tên rồi bấm đóng dấu hoặc nhờ AI viết hộ lời chúc nhé!
+                        </p>
+                    </div>
+
+                    <div id="stampHolder" style="display: none;">
+                        <div class="stamp-seal">
+                            <span>CHÚC MỪNG 20/10</span>
+                            <strong style="font-size: 13.5px; border-top: 1px solid #d62828; border-bottom: 1px solid #d62828; margin: 2px 0; padding: 2px 0;">
+                                XINH TƯƠI 10Đ
+                            </strong>
+                            <span>NAM CODE TẶNG</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Prank Dodge Button -->
+                <div class="prank-zone" id="notebookArena">
+                    <div>
+                        <div style="font-size: 16.5px; font-weight: 700;">
+                            🎁 Góc Bốc Quà Cuối Trang Vở:
+                        </div>
+                        <p id="prankStatusText" style="font-size: 15px; color: #d62828; margin-top: 2px;">
+                            Ai bấm trúng nút màu vàng bên dưới thì Nam khao trà sữa nha =)))
+                        </p>
+                    </div>
+
+                    <div style="display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: center; padding: 10px 0;">
+                        <button class="tool-btn" style="background: #1b369c; color: #fff; font-family: 'Patrick Hand', cursive; font-size: 16px;" onclick="giveNotebookCompliment()">
+                            ✨ Nhận Lời Chúc Điểm 10
+                        </button>
+
+                        <button id="dodgeBtn" class="tool-btn" style="background: var(--brutal-yellow); color: #111; font-family: 'Patrick Hand', cursive; font-size: 16px;" onmouseover="evadeButton(event)" ontouchstart="evadeButton(event)" onclick="evadeButton(event)">
+                            🧋 Bắt Nam Khao Trà Sữa
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="view-teacher" class="view-section">
+            <div class="chalkboard-container">
+                <button class="back-nav-btn" style="background: #ffeb3b; color: #193c28; border: 2px solid #111;" onclick="switchView('home')">
+                    ← Quay lại mặt bàn chính
+                </button>
+
+                <div class="chalk-header">
+                    <div style="font-family: 'Courier Prime', monospace; font-size: 11.5px; color: #a7f3d0; margin-bottom: 3px;">
+                        ★ CHÀO MỪNG NGÀY PHỤ NỮ VIỆT NAM 20/10 • LỚP 8 ★
+                    </div>
+                    <h2 class="chalk-title">
+                        Bảng Vàng Tri Ân Cô Giáo Kính Yêu
+                    </h2>
+                </div>
+
+                <div class="teacher-grid">
+                    <!-- Pinned Letter & Pledge -->
+                    <div class="pinned-lesson-note">
+                        <div class="magnet-pin"></div>
+                        <div style="display: flex; justify-content: space-between; font-family: 'Courier Prime', monospace; font-size: 11px; color: #666; border-bottom: 1px dashed #ccc; padding-bottom: 4px; margin-bottom: 6px;">
+                            <span>PHIẾU TRI ÂN 20/10</span>
+                            <span>HỌC SINH: NAM</span>
+                        </div>
+
+                        <h3 style="font-size: 18px; color: #b71c1c; margin-bottom: 6px;">
+                            Kính gửi Cô giáo của chúng em! 🌷
+                        </h3>
+
+                        <div id="teacherLetterText" style="font-size: 14px; line-height: 1.6; color: #222;">
+                            <p style="margin-bottom: 6px;">
+                                Nhân ngày Phụ nữ Việt Nam 20/10, em xin chúc Cô luôn dồi dào sức khỏe, lúc nào cũng trẻ trung, rạng rỡ và tràn đầy nhiệt huyết trên bục giảng ạ.
+                            </p>
+                            <p style="margin-bottom: 6px;">
+                                Cảm ơn Cô vì đã luôn kiên nhẫn chỉ bảo tụi em từng bài học. Chúc Cô ngày 20/10 ngập tràn hoa, niềm vui và chấm bài lớp em toàn 9 với 10 điểm ạ!
+                            </p>
+                        </div>
+
+                        <div style="margin-top: 10px; padding-top: 8px; border-top: 2px dashed #c8b696;">
+                            <strong style="font-size: 13.5px; color: #193c28;">📌 Bản Cam Kết Của Học Trò:</strong>
+                            <label class="pledge-item">
+                                <input type="checkbox" checked onchange="playClickNote()">
+                                <span>Thuộc bài cũ & làm bài tập đầy đủ 100%</span>
+                            </label>
+                            <label class="pledge-item">
+                                <input type="checkbox" checked onchange="playClickNote()">
+                                <span>Không nói chuyện riêng làm Cô tăng âm lượng</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Chalk Drawing & Gemini Teacher AI -->
+                    <div style="display: flex; flex-direction: column; gap: 14px;">
+                        <div class="chalk-draw-panel">
+                            <div style="width: 100%; display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; flex-wrap: wrap; gap: 6px;">
+                                <span style="font-size: 16px; color: #ffeb3b;">
+                                    🖍️ Bảng Phấn Vẽ Tặng Cô:
+                                </span>
+                                <div style="display: flex; gap: 6px; align-items: center;">
+                                    <button class="chalk-color-btn active" style="background: #ffffff;" onclick="setChalkColor('#ffffff', this)" title="Phấn trắng"></button>
+                                    <button class="chalk-color-btn" style="background: #ffe066;" onclick="setChalkColor('#ffe066', this)" title="Phấn vàng"></button>
+                                    <button class="chalk-color-btn" style="background: #ff9ebb;" onclick="setChalkColor('#ff9ebb', this)" title="Phấn hồng"></button>
+                                    <button class="chalk-color-btn" style="background: #72efdd;" onclick="setChalkColor('#72efdd', this)" title="Phấn xanh"></button>
+                                </div>
+                            </div>
+
+                            <canvas id="chalkCanvas"></canvas>
+
+                            <div style="width: 100%; display: flex; justify-content: space-between; gap: 6px; margin-top: 6px; flex-wrap: wrap;">
+                                <button class="tool-btn" style="background: #ffeb3b; color: #111; font-size: 11.5px;" onclick="drawAutoChalkFlower()">
+                                    🌸 Tự Vẽ Hoa Điểm 10
+                                </button>
+                                <button class="tool-btn" style="background: #fff; color: #111; font-size: 11.5px;" onclick="clearChalkboard(true)">
+                                    🧽 Lau Sạch Bảng
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Teacher Subject AI -->
+                        <div style="background: rgba(255, 253, 245, 0.95); color: #111; border: 2px solid #111; padding: 10px; box-shadow: 4px 4px 0px #0f2619;">
+                            <div style="font-family: 'Courier Prime', monospace; font-weight: 700; font-size: 11.5px; color: #193c28; margin-bottom: 5px; display: flex; justify-content: space-between;">
+                                <span>🤖 AI SOẠN LỜI CHÚC THEO MÔN CÔ DẠY:</span>
+                                <span id="teacherAiStatus" style="color: #b71c1c;"></span>
+                            </div>
+
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-bottom: 6px;">
+                                <input type="text" id="teacherNameInput" class="ai-input-brutal" style="margin-bottom: 0;" placeholder="Tên Cô (vd: Cô Hương)">
+                                <input type="text" id="teacherSubjectInput" class="ai-input-brutal" style="margin-bottom: 0;" placeholder="Môn (vd: Tiếng Anh)">
+                            </div>
+
+                            <button class="tool-btn" style="width: 100%; justify-content: center; background: #193c28; color: #ffeb3b; font-size: 12px;" onclick="generateTeacherAIWish()">
+                                ✨ Viết Lời Chúc Chuẩn Chuyên Môn
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer style="text-align: center; padding: 12px; font-family: 'Courier Prime', monospace; font-size: 12px; color: #4a4a4a;">
+        Handmade HTML/CSS/Canvas • Crafted by <strong>Nam</strong> (20/10)
+    </footer>
+
+    <audio id="customCustomMusic" loop preload="auto">
+        <source src="https://files.catbox.moe/f530x8.mp3" type="audio/mp3">
+    </audio>
+
+    <script>
+        // Security guards: block F12, context menu, console shortcuts
+        document.addEventListener('contextmenu', e => e.preventDefault());
+        document.addEventListener('keydown', e => {
+            if (e.key === 'F12' || 
+                (e.ctrlKey && e.shiftKey && ['I', 'J', 'C'].includes(e.key.toUpperCase())) || 
+                (e.ctrlKey && e.key.toUpperCase() === 'U')) {
+                e.preventDefault();
+                return false;
+            }
+        });
+
+        const allViews = ['home', 'mom', 'sister', 'classmates', 'teacher'];
+
+        function switchView(target) {
+            allViews.forEach(v => {
+                const section = document.getElementById('view-' + v);
+                if (v === target) {
+                    section.classList.add('active');
+                } else {
+                    section.classList.remove('active');
+                }
+            });
+
+            playClickNote();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+
+            if (target === 'sister') {
+                setTimeout(() => resetScratchCard(false), 50);
+            }
+            if (target === 'classmates') {
+                const dodgeBtn = document.getElementById('dodgeBtn');
+                if (dodgeBtn) dodgeBtn.style.transform = 'translate(0px, 0px)';
+            }
+            if (target === 'teacher') {
+                setTimeout(() => initChalkboardCanvas(), 50);
+            }
+        }
+
+        let momFlowerCounter = 1;
+        const flowerIcons = ['🌷', '🌹', '🌻', '🌸', '🌺', '💐', '🌼'];
+
+        function plantFlowerForMom() {
+            momFlowerCounter++;
+            document.getElementById('flowerCount').textContent = momFlowerCounter;
+            const garden = document.getElementById('momGarden');
+            const span = document.createElement('span');
+            span.className = 'planted-flower';
+            span.textContent = flowerIcons[momFlowerCounter % flowerIcons.length];
+            garden.appendChild(span);
+            playChord();
+        }
+
+        const extraReceiptLines = [
+            { item: "01x Nhường miếng ngon cuối cùng", price: "0 VNĐ" },
+            { item: "01x Giữ bí mật không mách Mẹ", price: "UY TÍN" },
+            { item: "01x Dọn hộ bàn học khi có biến", price: "FREE" },
+            { item: "01x Chúc chị sớm có đại gia rước", price: "100%" }
+        ];
+        let receiptIdx = 0;
+
+        function addFunnyReceiptLine() {
+            const container = document.getElementById('receiptItems');
+            const data = extraReceiptLines[receiptIdx % extraReceiptLines.length];
+            receiptIdx++;
+
+            const row = document.createElement('div');
+            row.className = 'receipt-line';
+            row.style.background = '#fff9db';
+            row.innerHTML = `<span>${data.item}</span><strong>${data.price}</strong>`;
+            container.appendChild(row);
+            playClickNote();
+        }
+
+        const sisterPrizes = [
+            "🧋 Voucher: 1 ly trà sữa full topping (Em trai đi mua giúp, chị trả tiền =))) )",
+            "💻 Gói Bảo Hành VIP: Cài lại Win, sửa lỗi mạng, diệt virus miễn phí trọn đời!",
+            "🧹 Phiếu Miễn Trừ: Em trai rửa bát / quét nhà hộ chị 1 lần trong ngày 20/10!",
+            "💸 Lời Chúc Vàng: Chúc chị trúng thưởng lớn để tài trợ em trai con ổ cứng mới =)))"
+        ];
+        let currentPrizeIndex = 0;
+        let isDrawingScratch = false;
+
+        function resetScratchCard(changePrize = true) {
+            const canvas = document.getElementById('scratchCanvas');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            const rect = canvas.parentElement.getBoundingClientRect();
+
+            canvas.width = rect.width;
+            canvas.height = rect.height;
+
+            if (changePrize) {
+                currentPrizeIndex = (currentPrizeIndex + 1) % sisterPrizes.length;
+                document.getElementById('scratchPrizeText').textContent = sisterPrizes[currentPrizeIndex];
+                playClickNote();
+            }
+
+            ctx.globalCompositeOperation = 'source-over';
+            const grad = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+            grad.addColorStop(0, '#c0c5ce');
+            grad.addColorStop(0.5, '#e2e6ec');
+            grad.addColorStop(1, '#a7adba');
+            ctx.fillStyle = grad;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            ctx.fillStyle = '#4f5b66';
+            ctx.font = 'bold 11.5px Courier Prime, monospace';
+            ctx.textAlign = 'center';
+            ctx.fillText('★ CÀO LỚP BẠC NÀY ĐỂ NHẬN QUÀ ★', canvas.width / 2, canvas.height / 2 - 4);
+            ctx.font = '10px Courier Prime, monospace';
+            ctx.fillText('(Dùng chuột/ngón tay chà)', canvas.width / 2, canvas.height / 2 + 14);
+
+            document.getElementById('scratchStatus').textContent = 'Trạng thái: Chưa cào';
+        }
+
+        function setupScratchEvents() {
+            const canvas = document.getElementById('scratchCanvas');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+
+            function scratchAt(x, y) {
+                ctx.globalCompositeOperation = 'destination-out';
+                ctx.beginPath();
+                ctx.arc(x, y, 18, 0, Math.PI * 2);
+                ctx.fill();
+                document.getElementById('scratchStatus').textContent = 'Trạng thái: Đã lộ quà! 🎉';
+            }
+
+            canvas.addEventListener('mousedown', (e) => {
+                isDrawingScratch = true;
+                const r = canvas.getBoundingClientRect();
+                scratchAt(e.clientX - r.left, e.clientY - r.top);
+            });
+
+            window.addEventListener('mousemove', (e) => {
+                if (!isDrawingScratch) return;
+                const r = canvas.getBoundingClientRect();
+                scratchAt(e.clientX - r.left, e.clientY - r.top);
+            });
+
+            window.addEventListener('mouseup', () => {
+                isDrawingScratch = false;
+            });
+
+            canvas.addEventListener('touchstart', (e) => {
+                isDrawingScratch = true;
+                const r = canvas.getBoundingClientRect();
+                const t = e.touches[0];
+                scratchAt(t.clientX - r.left, t.clientY - r.top);
+            }, { passive: true });
+
+            canvas.addEventListener('touchmove', (e) => {
+                if (!isDrawingScratch) return;
+                const r = canvas.getBoundingClientRect();
+                const t = e.touches[0];
+                scratchAt(t.clientX - r.left, t.clientY - r.top);
+            }, { passive: true });
+
+            canvas.addEventListener('touchend', () => {
+                isDrawingScratch = false;
+            });
+        }
+
+        function stampCertificate() {
+            const nameInput = document.getElementById('girlNameInput').value.trim();
+            const displayName = nameInput ? nameInput : "Bạn nữ lớp 8";
+            const resultText = document.getElementById('certResultText');
+            const stampHolder = document.getElementById('stampHolder');
+
+            stampHolder.style.display = 'none';
+            setTimeout(() => {
+                stampHolder.style.display = 'block';
+                resultText.textContent = `💮 Đã gửi thiệp chúc mừng 20/10 đến "${displayName}" thành công!`;
+                playStampThud();
+            }, 30);
+        }
+
+        const notebookWishes = [
+            "🖋️ Bút bi xanh ghi nhận: Chúc bạn học kỳ này điểm tổng kết toàn 9.0+, xinh tươi cả năm!",
+            "🖋️ Chúc bạn 20/10 nhận được thật nhiều quà, đi học không bao giờ bị gọi kiểm tra miệng!",
+            "🖋️ Chúc hội chị em lớp mình lúc nào cũng cười tươi như hoa và luôn gặp nhiều may mắn nhé!"
+        ];
+        let dodgeCounter = 0;
+
+        function evadeButton(e) {
+            if (e) e.preventDefault();
+            const btn = document.getElementById('dodgeBtn');
+            const arena = document.getElementById('notebookArena');
+            const status = document.getElementById('prankStatusText');
+
+            dodgeCounter++;
+            const maxX = Math.max(25, (arena.clientWidth / 2) - 70);
+            const randX = Math.floor(Math.random() * (maxX * 2)) - maxX;
+            const randY = Math.floor(Math.random() * 50) - 25;
+
+            btn.style.transform = `translate(${randX}px, ${randY}px) rotate(${randX % 8}deg)`;
+
+            const taunts = [
+                "Ơ kìa bấm trượt rồi =))) Nút khao trà sữa biết chạy trốn đấy!",
+                "Cố gắng lên sắp bấm trúng rồi đấy =)))",
+                "Haha làm sao mà bắt được nút này, nhận lời chúc đi nào! 🤣"
+            ];
+            status.textContent = taunts[dodgeCounter % taunts.length];
+        }
+
+        function giveNotebookCompliment() {
+            const status = document.getElementById('prankStatusText');
+            const wish = notebookWishes[Math.floor(Math.random() * notebookWishes.length)];
+            status.style.color = '#1b369c';
+            status.textContent = wish;
+            document.getElementById('dodgeBtn').style.transform = 'translate(0px, 0px)';
+            playChord();
+        }
+
+        let audioCtx = null;
+        let cassettePlaying = true;
+
+        function ensureAudio() {
+            if (!audioCtx) {
+                const AudioContext = window.AudioContext || window.webkitAudioContext;
+                audioCtx = new AudioContext();
+            }
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+        }
+
+        function playSynthNote(freq, dur = 0.2, type = 'triangle', vol = 0.04, delayMs = 0) {
+            if (!audioCtx) return;
+            setTimeout(() => {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = type;
+                osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+
+                gain.gain.setValueAtTime(0.001, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(vol, audioCtx.currentTime + 0.02);
+                gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + dur);
+
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start();
+                osc.stop(audioCtx.currentTime + dur);
+            }, delayMs);
+        }
+
+        function playClickNote() {
+            ensureAudio();
+            playSynthNote(587.33, 0.12, 'triangle', 0.035, 0);
+        }
+
+        function playChord() {
+            ensureAudio();
+            [523.25, 659.25, 783.99, 1046.5].forEach((f, idx) => {
+                playSynthNote(f, 0.25, 'triangle', 0.04, idx * 65);
+            });
+        }
+
+        function playStampThud() {
+            ensureAudio();
+            playSynthNote(130.81, 0.2, 'sawtooth', 0.07, 0);
+        }
+
+        function toggleRetroMusic() {
+            const customAudio = document.getElementById('customCustomMusic');
+            const btn = document.getElementById('soundBtn');
+            const label = document.getElementById('soundLabel');
+
+            cassettePlaying = !cassettePlaying;
+            if (cassettePlaying) {
+                customAudio.play().catch(() => {});
+                btn.classList.add('active-mode');
+                label.textContent = 'Đang phát Nhạc 20/10';
+            } else {
+                customAudio.pause();
+                btn.classList.remove('active-mode');
+                label.textContent = 'Bật Nhạc 20/10';
+            }
+        }
+
+        let currentChalkColor = '#ffffff';
+        let isDrawingChalk = false;
+        let lastChalkX = 0;
+        let lastChalkY = 0;
+
+        function setChalkColor(color, btnEl) {
+            currentChalkColor = color;
+            document.querySelectorAll('.chalk-color-btn').forEach(b => b.classList.remove('active'));
+            if (btnEl) btnEl.classList.add('active');
+            playClickNote();
+        }
+
+        function initChalkboardCanvas() {
+            const canvas = document.getElementById('chalkCanvas');
+            if (!canvas) return;
+            const rect = canvas.parentElement.getBoundingClientRect();
+            if (rect.width === 0) return;
+
+            canvas.width = rect.width;
+            canvas.height = rect.height;
+            drawAutoChalkFlower(false);
+        }
+
+        function clearChalkboard(withSound = true) {
+            const canvas = document.getElementById('chalkCanvas');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            if (withSound) playClickNote();
+        }
+
+        function drawAutoChalkFlower(withSound = true) {
+            const canvas = document.getElementById('chalkCanvas');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            const cx = canvas.width / 2 - 35;
+            const cy = canvas.height / 2 + 5;
+
+            ctx.strokeStyle = '#72efdd';
+            ctx.lineWidth = 2.5;
+            ctx.beginPath();
+            ctx.moveTo(cx, cy + 20);
+            ctx.quadraticCurveTo(cx - 6, cy + 40, cx, cy + 65);
+            ctx.stroke();
+
+            ctx.strokeStyle = '#ff9ebb';
+            ctx.lineWidth = 2;
+            for (let i = 0; i < 6; i++) {
+                const angle = (i * Math.PI) / 3;
+                const px = cx + Math.cos(angle) * 16;
+                const py = cy + Math.sin(angle) * 16;
+                ctx.beginPath();
+                ctx.arc(px, py, 11, 0, Math.PI * 2);
+                ctx.stroke();
+            }
+
+            ctx.fillStyle = '#ffe066';
+            ctx.beginPath();
+            ctx.arc(cx, cy, 8, 0, Math.PI * 2);
+            ctx.fill();
+
+            ctx.fillStyle = '#ffffff';
+            ctx.font = '16px Patrick Hand, cursive';
+            ctx.fillText('★ CHÚC MỪNG 20/10 - 10 ĐIỂM! ★', cx + 25, cy - 25);
+            if (withSound) playClickNote();
+        }
+
+        function setupChalkboardEvents() {
+            const canvas = document.getElementById('chalkCanvas');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+
+            function getPos(e) {
+                const r = canvas.getBoundingClientRect();
+                const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+                const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+                return { x: clientX - r.left, y: clientY - r.top };
+            }
+
+            function startDraw(e) {
+                isDrawingChalk = true;
+                const p = getPos(e);
+                lastChalkX = p.x;
+                lastChalkY = p.y;
+            }
+
+            function draw(e) {
+                if (!isDrawingChalk) return;
+                const p = getPos(e);
+
+                ctx.strokeStyle = currentChalkColor;
+                ctx.lineWidth = 2.5;
+                ctx.lineCap = 'round';
+                ctx.lineJoin = 'round';
+
+                ctx.beginPath();
+                ctx.moveTo(lastChalkX, lastChalkY);
+                ctx.lineTo(p.x, p.y);
+                ctx.stroke();
+
+                lastChalkX = p.x;
+                lastChalkY = p.y;
+            }
+
+            function stopDraw() {
+                isDrawingChalk = false;
+            }
+
+            canvas.addEventListener('mousedown', startDraw);
+            canvas.addEventListener('mousemove', draw);
+            window.addEventListener('mouseup', stopDraw);
+
+            canvas.addEventListener('touchstart', (e) => { startDraw(e); }, { passive: true });
+            canvas.addEventListener('touchmove', (e) => { draw(e); }, { passive: true });
+            canvas.addEventListener('touchend', stopDraw);
+        }
+
+        async function callGeminiAPI(prompt, systemInstruction = "") {
+            const apiKey = "";
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview:generateContent?key=${apiKey}`;
+            const body = {
+                contents: [{ parts: [{ text: prompt }] }],
+                systemInstruction: systemInstruction ? { parts: [{ text: systemInstruction }] } : undefined
+            };
+
+            const res = await fetch(url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(body)
+            });
+            const data = await res.json();
+            return data.candidates?.[0]?.content?.parts?.[0]?.text || "Không nhận được phản hồi từ AI.";
+        }
+
+        async function generateMomAIContent(type) {
+            const status = document.getElementById('momAiStatus');
+            const output = document.getElementById('momAiOutput');
+            status.textContent = 'Đang đánh chữ...';
+            output.style.display = 'block';
+
+            try {
+                let prompt = type === 'poem' 
+                    ? "Viết 4 câu thơ lục bát ngắn gọn, ấm áp và dí dỏm tặng Mẹ nhân ngày 20/10, nhắc đến cậu con trai hay vọc máy tính."
+                    : "Viết thêm một đoạn tái bút (P/S) cực kỳ lầy lội và tình cảm của cậu con trai lớp 8 gửi Mẹ ngày 20/10.";
+                
+                const text = await callGeminiAPI(prompt, "Bạn là một cậu con trai học lớp 8, giỏi công nghệ, thương Mẹ nhưng hay pha trò hài hước.");
+                output.innerHTML = `<strong>🤖 Tái bút từ AI:</strong> ${text}`;
+                status.textContent = 'Xong!';
+                playChord();
+            } catch (err) {
+                status.textContent = 'Lỗi kết nối AI!';
+            }
+        }
+
+        async function generateSisterAIReceiptAndPrize() {
+            const trait = document.getElementById('sisterTraitInput').value.trim() || "hay sai vặt, nghiện trà sữa";
+            const status = document.getElementById('sisterAiStatus');
+            status.textContent = 'Đang tính sổ...';
+
+            try {
+                const prompt = `Dựa trên đặc điểm của chị gái: "${trait}", hãy tạo JSON gồm:
+                1. "line": một dòng hóa đơn cực lầy lội (ví dụ: "01x Sai em trai lấy nước lúc nửa đêm | GIÁ: 100% CỌC").
+                2. "prize": một phần thưởng thẻ cào hài hước (ví dụ: "Voucher: 1 ly trà sữa mang tận giường").
+                Trả về JSON thuần túy dạng {"line": "...", "prize": "..."}`;
+
+                const text = await callGeminiAPI(prompt, "Bạn là em trai lầy lội viết hóa đơn trêu chị gái ngày 20/10. Chỉ trả về JSON thuần túy.");
+                const cleanJson = text.replace(/```json/g, '').replace(/```/g, '').trim();
+                const data = JSON.parse(cleanJson);
+
+                const container = document.getElementById('receiptItems');
+                const row = document.createElement('div');
+                row.className = 'receipt-line';
+                row.style.background = '#fff9db';
+                row.innerHTML = `<span>${data.line}</span><strong>AI TẠO</strong>`;
+                container.appendChild(row);
+
+                document.getElementById('scratchPrizeText').textContent = data.prize;
+                resetScratchCard(false);
+
+                status.textContent = 'Đã in bill & nạp thẻ!';
+                playChord();
+            } catch (err) {
+                status.textContent = 'Dùng dữ liệu mặc định!';
+                addFunnyReceiptLine();
+            }
+        }
+
+        async function generateClassmateAICertificate() {
+            const name = document.getElementById('girlNameInput').value.trim() || "Bạn nữ lớp tôi";
+            const trait = document.getElementById('girlTraitInput').value.trim() || "xinh đẹp học giỏi";
+            const resultText = document.getElementById('certResultText');
+
+            resultText.textContent = 'AI đang viết lời chúc...';
+            try {
+                const prompt = `Viết một lời chúc 20/10 cực kỳ thân thiện, vui vẻ và dí dỏm tặng bạn nữ tên "${name}" có đặc điểm "${trait}". Ngắn gọn dưới 30 từ.`;
+                const text = await callGeminiAPI(prompt, "Bạn là cậu bạn học sinh lớp 8 viết lời chúc dễ thương cho bạn cùng lớp.");
+                resultText.textContent = `✨ Lời chúc AI: ${text}`;
+                stampCertificate();
+            } catch(e) {
+                stampCertificate();
+            }
+        }
+
+        async function generateTeacherAIWish() {
+            const name = document.getElementById('teacherNameInput').value.trim() || "Cô giáo";
+            const subject = document.getElementById('teacherSubjectInput').value.trim() || "môn học";
+            const status = document.getElementById('teacherAiStatus');
+            const letterBox = document.getElementById('teacherLetterText');
+            status.textContent = 'Đang soạn...';
+
+            try {
+                const prompt = `Viết một lời chúc 20/10 ngắn gọn, lễ phép và cực kỳ sáng tạo tặng ${name} dạy ${subject}, trong đó lồng ghép khéo léo thuật ngữ hoặc đặc trưng vui nhộn của môn ${subject}. Dưới 50 từ.`;
+                const text = await callGeminiAPI(prompt, "Bạn là học sinh lớp 8 giỏi văn phong dí dỏm tri ân thầy cô.");
+                letterBox.innerHTML = `<p style="margin-bottom: 6px;"><strong>Kính gửi ${name} (${subject}):</strong></p><p>${text}</p>`;
+                status.textContent = 'Xong!';
+                playChord();
+            } catch (err) {
+                status.textContent = 'Lỗi AI!';
+            }
+        }
+
+        window.onload = function() {
+            setupScratchEvents();
+            initChalkboardCanvas();
+            setupChalkboardEvents();
+
+            // Auto play music on load using your catbox link
+            const audio = document.getElementById('customCustomMusic');
+            audio.play().then(() => {
+                cassettePlaying = true;
+            }).catch(() => {
+                cassettePlaying = false;
+                const btn = document.getElementById('soundBtn');
+                const label = document.getElementById('soundLabel');
+                btn.classList.remove('active-mode');
+                label.textContent = 'Bật Nhạc 20/10';
+            });
+        };
+    </script>
+</body>
+</html>
